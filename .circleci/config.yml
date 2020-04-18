@@ -66,7 +66,7 @@ jobs:
       - *attach_workspace
       - checkout          # get the code from GitHub
       - node/with-cache:  # orb command => restoring/saving a cache
-          cache-version: v2
+          cache-version: v1
           steps:
             - run: npm install --loglevel=error
 
@@ -76,7 +76,7 @@ jobs:
       - *attach_workspace
       - checkout
       - node/with-cache:
-          cache-version: v2
+          cache-version: v1
           steps:
             - run: ls -all
             # - run: echo 'SKIP_PREFLIGHT_CHECK=true' >> .env # for vers. problems
@@ -91,7 +91,7 @@ jobs:
       - *attach_workspace
       - checkout
       - node/with-cache:
-          cache-version: v2
+          cache-version: v1
           steps:
             - run:
                 name: Deploying app to gh-pages
