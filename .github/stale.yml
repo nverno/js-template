@@ -1,0 +1,5 @@
+# See Configuration for probot-stale - https://github.com/probot/stale
+# for defaults
+
+# Give branches two weeks of inactivity given our timeline
+daysUntilStale: 14

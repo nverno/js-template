@@ -1,0 +1,98 @@
+# By default, this will use docker image circleci/node:latest
+# And cache npm dependencies by branch + checksum "package.json"
+#
+# Dockerfiles:
+# https://github.com/CircleCI-Public/circleci-dockerfiles/master/node/images/13.8.0-stretch/Dockerfile
+# Reference: https://circleci.com/docs/2.0/circleci-images/
+#
+# To see a dump of process setup under-the-hood locally, run
+# > circleci config process config.yml
+#
+# Run locally (requires docker + circleci) with makefile:
+# > CI_JOB=build make run-ci
+#
+# There is also support for testing w/ GPUs, if we need it for rendering:
+# https://circleci.com/docs/2.0/executor-types/#using-gpus
+# 
+# Plugins that provide some helpful commands: https://circleci.com/orbs/
+version: 2.1
+
+orbs:
+  # https://circleci.com/orbs/registry/orb/circleci/node
+  node: circleci/node@1.1.6
+  # https://circleci.com/orbs/registry/orb/circleci/codecov
+  codecov: circleci/codecov@0.0.5
+  # https://circleci.com/orbs/registry/orb/circleci/slack
+  slack: circleci/slack@3.4.2
+
+# Yaml references
+references:
+  workspace_root: &workspace_root
+    ~/project
+  attach_workspace: &attach_workspace
+    attach_workspace:
+      at: *workspace_root
+
+# Pipelines => collections of jobs defined below
+workflows:
+  version: 2
+
+  # Install node packages, run tests, report coverage
+  build-test:
+    jobs:
+      - build
+      - test:
+          requires:
+            - build
+
+  # deploy currently set to just run on master => could rebuild gh-pages
+  build-deploy:
+    jobs:
+      - build
+      - deploy:
+          requires:
+            - build
+          filters:
+            branches:
+              only: master
+
+## -------------------------------------------------------------------
+## Each job used in the workflows is defined here
+
+jobs:
+  build:                  # Build node_modules cache
+    executor: node/default
+    steps:
+      - *attach_workspace
+      - checkout          # get the code from GitHub
+      - node/with-cache:  # orb command => restoring/saving a cache
+          cache-version: v2
+          steps:
+            - run: npm install --loglevel=error
+
+  test:                   # Default tests & generate coverage report
+    executor: node/default
+    steps:
+      - *attach_workspace
+      - checkout
+      - node/with-cache:
+          cache-version: v2
+          steps:
+            - run: ls -all
+            # - run: echo 'SKIP_PREFLIGHT_CHECK=true' >> .env # for vers. problems
+            - run: npm run 'test:coverage'
+      - codecov/upload:
+          path: coverage
+
+  # Deploy github pages on changes to master
+  deploy:
+    executor: node/default
+    steps:
+      - *attach_workspace
+      - checkout
+      - node/with-cache:
+          cache-version: v2
+          steps:
+            - run:
+                name: Deploying app to gh-pages
+                command: npm run deploy

@@ -1,0 +1,39 @@
+.DS_STORE
+node_modules/
+*~
+*.#*
+*.pyc
+.grunt
+_SpecRunner.html
+__benchmarks__
+build/
+coverage/
+.module-cache
+*.log*
+chrome-user-data
+*.sublime-project
+*.sublime-workspace
+.idea
+*.iml
+.vscode
+*.swp
+*.swo
+.env.development
+.eslintcache
+.tern-*
+
+# dev env. vars
+.env.development
+
+# yarn
+.pnp.js
+.pnp/
+yarn.lock
+
+# tags
+GPATH
+GSYMS
+GRTAGS
+GTAGS
+TAGS
+tags

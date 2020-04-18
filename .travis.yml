@@ -1,0 +1,37 @@
+language: node_js
+node_js:
+  - lts/*
+  
+os: linux
+
+# npm cached by default
+# if package.json and yarn.lock are present: yarn --frozen-lockfile is run
+cache:
+  yarn: true
+  directories:
+    - node_modules
+
+# tried using yarn a bit -- a little faster I think, but kinda annoying
+# before_script:
+
+install:
+  - curl -o- -L https://yarnpkg.com/install.sh | bash
+  - export PATH="$HOME/.yarn/bin:$PATH"
+  - yarn install --non-interactive --no-default-rc --force # --skip-integrity-check
+script:
+# - echo 'SKIP_PREFLIGHT_CHECK=true' >> .env
+  - npm run 'test:coverage'
+
+after_success:
+  # Report code coverage -- XXX: haven't tested this
+  - bash <(curl -s https://codecov.io/bash)
+
+# could bother ourselves on slack if we wanted, like on failures, etc.
+notifications:
+  email: false
+
+# ignore version tags ??
+branches:
+  except:
+    - /^v\d+\.\d+\.\d+$/
+    - gh-pages
